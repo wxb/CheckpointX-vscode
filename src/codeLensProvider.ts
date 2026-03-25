@@ -25,13 +25,13 @@ export class CheckpointCodeLensProvider implements vscode.CodeLensProvider {
         new vscode.Position(line, 0)
       );
 
-      // 构建显示文本
-      const title = `🚀 CHKPT ${checkpoint.message} <${checkpoint.branch}> @${checkpoint.author}`;
-
+      // 构建显示文本 
+      const title = `🎯 ${checkpoint.message} <${checkpoint.branch}> @${checkpoint.author}`;
+    
       const codeLens = new vscode.CodeLens(range, {
-        title: title,
-        tooltip: `检查点: ${checkpoint.message}\n分支: ${checkpoint.branch}\n作者: @${checkpoint.author}`,
-        command: 'checkpoint.removeCheckpoint',
+      title: title,
+      tooltip: `检查点: ${checkpoint.message}\n分支: ${checkpoint.branch}\n作者: @${checkpoint.author}`,
+      command: 'checkpoint.removeCheckpoint',
         arguments: [{ filePath: checkpoint.filePath, line: checkpoint.line }]
       });
 
