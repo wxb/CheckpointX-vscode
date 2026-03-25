@@ -5,30 +5,37 @@ All notable changes to the "checkpointX" extension will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.0] - 2026-03-24
+## [4.0.0] - 2026-03-25
 
 ### Added
-- ✨ 初始版本发布
-- 🎯 支持通过快捷键 `Ctrl+Alt+P` (Mac: `Cmd+Ctrl+P`) 快速添加检查点
-- 📋 支持右键菜单添加检查点
-- 🌿 自动识别 Git 分支并按分支组织检查点
-- 👤 自动记录标记人（基于 Git 配置）
-- 🎨 彩色标签显示：CHKPT（红底白字）、提示信息（灰色）、分支名（蓝色）、作者（金色）
-- 📁 检查点数据存储在 `checkpoint.json` 文件中，支持 Git 共享
-- 🔄 支持实时同步 `checkpoint.json` 变化
-- 🔍 支持查看所有检查点并快速跳转
-- ❌ 支持移除检查点
+- 📝 **智能输入**: 输入框支持实时验证，检查点信息不能为空
+- 🚫 **重复检测**: 同一位置添加检查点时提示覆盖或取消，避免误操作
+- 💬 **详细悬停提示**: 侧边栏中悬停显示检查点完整信息（文件、行号、作者、分支、创建时间）
+- 📋 **命令列表文档**: README 中新增完整的命令列表说明
+- 🎯 **使用提示**: 添加检查点时显示覆盖提示和确认对话框
 
-### Features
-- 多色分段显示检查点信息，直观醒目
-- 相对路径存储，支持团队协作
-- 文件系统监听，实时更新显示
-- 悬停提示显示完整检查点信息
+### Changed
+- 📚 **文档完善**: 全面更新 README.md，补充详细的使用说明和功能介绍
+- 🎨 **功能描述优化**: 功能特性列表更加完整和清晰
+- 🔍 **搜索关键词**: 优化 VS Code 市场搜索关键词，支持中英文
 
 ### Technical
-- 基于 VS Code Extension API 开发
-- TypeScript 类型安全
-- 模块化架构设计
+- 🧹 **代码清理**: 移除冗余代码，优化文件结构
+- 🔧 **类型安全**: 完善 TypeScript 类型定义
+- ⚡ **性能优化**: 优化刷新机制，减少不必要的重渲染
+
+## [3.0.0] - 2026-03-25
+
+### Changed
+- 🏷️ **全面重命名**: 所有代码和文档中的 `checkpoint` 已全面更名为 `checkpointX`
+- 📦 **版本升级**: 版本号升级至 3.0.0，标志插件进入稳定阶段
+- 📝 **文档统一**: README、CHANGELOG 等文档统一使用新名称
+
+### Technical
+- 统一代码中的命令前缀为 `checkpointX`
+- 统一配置项命名空间为 `checkpointX`
+- 统一视图 ID 为 `checkpointXTree`
+- 确保所有文件引用一致性
 
 ## [2.0.0] - 2026-03-25
 
@@ -57,15 +64,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 新增配置项 `checkpointX.showInExplorer` 控制侧边栏显示
 - 优化 Git 作者信息获取逻辑
 
-## [3.0.0] - 2026-03-25
+## [1.0.0] - 2026-03-24
 
-### Changed
-- 🏷️ **全面重命名**: 所有代码和文档中的 `checkpoint` 已全面更名为 `checkpointX`
-- 📦 **版本升级**: 版本号升级至 3.0.0，标志插件进入稳定阶段
-- 📝 **文档统一**: README、CHANGELOG 等文档统一使用新名称
+### Added
+- ✨ 初始版本发布
+- 🎯 支持通过快捷键 `Ctrl+Alt+P` (Mac: `Cmd+Ctrl+P`) 快速添加检查点
+- 📋 支持右键菜单添加检查点
+- 🌿 自动识别 Git 分支并按分支组织检查点
+- 👤 自动记录标记人（基于 Git 配置）
+- 🎨 彩色标签显示：CHKPT（红底白字）、提示信息（灰色）、分支名（蓝色）、作者（金色）
+- 📁 检查点数据存储在 `checkpoint.json` 文件中，支持 Git 共享
+- 🔄 支持实时同步 `checkpoint.json` 变化
+- 🔍 支持查看所有检查点并快速跳转
+- ❌ 支持移除检查点
+
+### Features
+- 多色分段显示检查点信息，直观醒目
+- 相对路径存储，支持团队协作
+- 文件系统监听，实时更新显示
+- 悬停提示显示完整检查点信息
 
 ### Technical
-- 统一代码中的命令前缀为 `checkpointX`
-- 统一配置项命名空间为 `checkpointX`
-- 统一视图 ID 为 `checkpointXTree`
-- 确保所有文件引用一致性
+- 基于 VS Code Extension API 开发
+- TypeScript 类型安全
+- 模块化架构设计
