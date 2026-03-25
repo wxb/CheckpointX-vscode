@@ -31,7 +31,7 @@ export class CheckpointCodeLensProvider implements vscode.CodeLensProvider {
       const codeLens = new vscode.CodeLens(range, {
       title: title,
       tooltip: `检查点: ${checkpoint.message}\n分支: ${checkpoint.branch}\n作者: @${checkpoint.author}`,
-      command: 'checkpoint.removeCheckpoint',
+      command: 'checkpointX.removeCheckpoint',
         arguments: [{ filePath: checkpoint.filePath, line: checkpoint.line }]
       });
 

@@ -121,7 +121,7 @@ export class DecorationProvider {
     markdown.appendMarkdown(`- **消息**: ${checkpoint.message}\n`);
     markdown.appendMarkdown(`- **标记人**: @${checkpoint.author}\n`);
     markdown.appendMarkdown(`- **创建时间**: ${new Date(checkpoint.createdAt).toLocaleString()}\n\n`);
-    markdown.appendMarkdown(`[点击移除检查点](command:checkpoint.removeCheckpoint?${encodeURIComponent(JSON.stringify({ filePath: checkpoint.filePath, line: checkpoint.line }))})`);
+    markdown.appendMarkdown(`[点击移除检查点](command:checkpointX.removeCheckpoint?${encodeURIComponent(JSON.stringify({ filePath: checkpoint.filePath, line: checkpoint.line }))})`);
     markdown.isTrusted = true;
     return markdown;
   }

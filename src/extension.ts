@@ -16,14 +16,14 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // 注册 TreeView
-  const treeView = vscode.window.createTreeView('checkpointTree', {
+  const treeView = vscode.window.createTreeView('checkpointXTree', {
     treeDataProvider: treeProvider,
     showCollapseAll: true
   });
 
   // 注册添加检查点命令
   const addCheckpointCommand = vscode.commands.registerCommand(
-    'checkpoint.addCheckpoint',
+    'checkpointX.addCheckpoint',
     async () => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
@@ -95,7 +95,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 注册移除检查点命令
   const removeCheckpointCommand = vscode.commands.registerCommand(
-    'checkpoint.removeCheckpoint',
+    'checkpointX.removeCheckpoint',
     async (args?: { filePath: string; line: number } | Checkpoint) => {
       let filePath: string;
       let line: number;
@@ -147,16 +147,16 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 注册查看所有检查点命令
   const viewCheckpointsCommand = vscode.commands.registerCommand(
-    'checkpoint.viewCheckpoints',
+    'checkpointX.viewCheckpoints',
     async () => {
       // 聚焦到 TreeView
-      vscode.commands.executeCommand('checkpointTree.focus');
+      vscode.commands.executeCommand('checkpointXTree.focus');
     }
   );
 
   // 注册刷新树命令
   const refreshTreeCommand = vscode.commands.registerCommand(
-    'checkpoint.refreshTree',
+    'checkpointX.refreshTree',
     () => {
       manager.refresh();
       codeLensProvider.refresh();
@@ -167,7 +167,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 注册跳转到检查点命令
   const jumpToCheckpointCommand = vscode.commands.registerCommand(
-    'checkpoint.jumpToCheckpoint',
+    'checkpointX.jumpToCheckpoint',
     async (checkpoint: Checkpoint) => {
       try {
         const document = await vscode.workspace.openTextDocument(checkpoint.filePath);
@@ -187,7 +187,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // 注册清空所有检查点命令
   const clearAllCommand = vscode.commands.registerCommand(
-    'checkpoint.clearAll',
+    'checkpointX.clearAll',
     async () => {
       const checkpoints = manager.getAllCheckpoints();
       if (checkpoints.length === 0) {
@@ -227,7 +227,7 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // 注册 checkpoint.json 文件变化监听器
-  const config = vscode.workspace.getConfiguration('checkpoint');
+  const config = vscode.workspace.getConfiguration('checkpointX');
   const checkpointFilename = config.get<string>('filename', 'checkpoint.json');
   const checkpointFileWatcher = vscode.workspace.createFileSystemWatcher(`**/${checkpointFilename}`);
   
@@ -268,9 +268,9 @@ export function activate(context: vscode.ExtensionContext) {
   codeLensProvider.refresh();
   treeProvider.refresh();
 
-  console.log('Checkpoint 插件 2.0 已激活');
+  console.log('CheckpointX 插件 2.0 已激活');
 }
 
 export function deactivate() {
-  console.log('Checkpoint 插件已停用');
+  console.log('CheckpointX 插件已停用');
 }

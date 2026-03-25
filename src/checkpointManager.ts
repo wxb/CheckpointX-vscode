@@ -29,7 +29,7 @@ export class CheckpointManager {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders && workspaceFolders.length > 0) {
       this.workspaceRoot = workspaceFolders[0].uri.fsPath;
-      const config = vscode.workspace.getConfiguration('checkpoint');
+      const config = vscode.workspace.getConfiguration('checkpointX');
       const filename = config.get<string>('filename', 'checkpoint.json');
       this.checkpointFilePath = path.join(this.workspaceRoot, filename);
       this.loadCheckpoints();

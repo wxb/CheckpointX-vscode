@@ -51,7 +51,7 @@ export class CheckpointTreeItem extends vscode.TreeItem {
       
       // 点击命令 - 跳转到文件位置
       this.command = {
-        command: 'checkpoint.jumpToCheckpoint',
+        command: 'checkpointX.jumpToCheckpoint',
         title: '跳转到检查点',
         arguments: [checkpoint]
       };
