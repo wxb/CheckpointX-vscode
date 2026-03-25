@@ -14,7 +14,8 @@ export class CheckpointTreeItem extends vscode.TreeItem {
     public readonly label: string,
     public readonly type: TreeItemType,
     public readonly checkpoint?: Checkpoint,
-    public readonly children?: CheckpointTreeItem[]
+    public readonly children?: CheckpointTreeItem[],
+    public readonly index?: number
   ) {
     super(
       label,
@@ -28,9 +29,18 @@ export class CheckpointTreeItem extends vscode.TreeItem {
       this.iconPath = new vscode.ThemeIcon('git-branch');
       this.contextValue = 'branch';
     } else if (checkpoint) {
-      // 检查点节点
-      this.iconPath = new vscode.ThemeIcon('debug-breakpoint');
+      // 检查点节点 - 使用序号作为图标
       this.contextValue = 'checkpoint';
+      
+      // 如果有索引，创建一个显示数字的图标
+      if (index !== undefined) {
+        // 使用圆点图标配合 label 显示序号
+        this.iconPath = new vscode.ThemeIcon('circle-filled');
+        // 在 label 前添加序号
+        this.label = `${index + 1}. ${label}`;
+      } else {
+        this.iconPath = new vscode.ThemeIcon('debug-breakpoint');
+      }
       
       // 显示文件路径和行号
       const fileName = checkpoint.filePath.split(/[\\/]/).pop() || checkpoint.filePath;
@@ -111,10 +121,10 @@ export class CheckpointTreeProvider implements vscode.TreeDataProvider<Checkpoin
     sortedBranches.forEach(branch => {
       const group = branchGroups.get(branch)!;
       
-      // 创建检查点子节点
+      // 创建检查点子节点 - 带序号
       const children = group
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .map(cp => new CheckpointTreeItem(cp.message, TreeItemType.Checkpoint, cp));
+        .map((cp, idx) => new CheckpointTreeItem(cp.message, TreeItemType.Checkpoint, cp, undefined, idx));
       
       // 创建分支节点
       const branchItem = new CheckpointTreeItem(

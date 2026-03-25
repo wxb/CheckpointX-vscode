@@ -76,12 +76,20 @@
         "icon": "$(clear-all)"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "checkpoint",
+          "title": "Checkpoint",
+          "icon": "images/checkpoint-icon.png"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "checkpoint": [
         {
           "id": "checkpointTree",
-          "name": "Checkpoint 检查点",
-          "when": "workspaceHasCheckpoint",
+          "name": "检查点列表",
           "icon": "images/checkpoint-icon.png",
           "contextualTitle": "Checkpoint"
         }

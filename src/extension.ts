@@ -21,13 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
     showCollapseAll: true
   });
 
-  // 设置上下文变量 - 控制侧边栏显示
-  const updateContext = () => {
-    const hasCheckpoints = manager.getAllCheckpoints().length > 0;
-    vscode.commands.executeCommand('setContext', 'workspaceHasCheckpoint', hasCheckpoints);
-  };
-  updateContext();
-
   // 注册添加检查点命令
   const addCheckpointCommand = vscode.commands.registerCommand(
     'checkpoint.addCheckpoint',
@@ -93,7 +86,6 @@ export function activate(context: vscode.ExtensionContext) {
       // 刷新 CodeLens 和 TreeView
       codeLensProvider.refresh();
       treeProvider.refresh();
-      updateContext();
 
       vscode.window.showInformationMessage(
         `检查点已添加 [${checkpoint.branch}]: ${checkpoint.message}`
@@ -147,7 +139,6 @@ export function activate(context: vscode.ExtensionContext) {
         // 刷新 CodeLens 和 TreeView
         codeLensProvider.refresh();
         treeProvider.refresh();
-        updateContext();
 
         vscode.window.showInformationMessage('检查点已移除');
       }
@@ -170,7 +161,6 @@ export function activate(context: vscode.ExtensionContext) {
       manager.refresh();
       codeLensProvider.refresh();
       treeProvider.refresh();
-      updateContext();
       vscode.window.showInformationMessage('检查点列表已刷新');
     }
   );
@@ -220,7 +210,6 @@ export function activate(context: vscode.ExtensionContext) {
         // 刷新
         codeLensProvider.refresh();
         treeProvider.refresh();
-        updateContext();
 
         vscode.window.showInformationMessage('所有检查点已清空');
       }
@@ -246,21 +235,18 @@ export function activate(context: vscode.ExtensionContext) {
     manager.refresh();
     codeLensProvider.refresh();
     treeProvider.refresh();
-    updateContext();
   });
-  
+
   checkpointFileWatcher.onDidCreate(() => {
     manager.refresh();
     codeLensProvider.refresh();
     treeProvider.refresh();
-    updateContext();
   });
-  
+
   checkpointFileWatcher.onDidDelete(() => {
     manager.refresh();
     codeLensProvider.refresh();
     treeProvider.refresh();
-    updateContext();
   });
 
   // 将所有命令和监听器添加到订阅
