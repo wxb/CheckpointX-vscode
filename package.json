@@ -2,7 +2,7 @@
   "name": "checkpoint",
   "displayName": "Checkpoint - 代码检查点管理",
   "description": "在代码开发中实时记录需要上线前检查的事项，支持分支分类和团队协作",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "publisher": "checkpoint",
   "author": {
     "name": "Checkpoint Team"
@@ -35,25 +35,62 @@
   ],
   "icon": "images/icon.png",
   "activationEvents": [
-    "onCommand:checkpoint.addCheckpoint"
+    "onCommand:checkpoint.addCheckpoint",
+    "onView:checkpointTree"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "checkpoint.addCheckpoint",
-        "title": "添加Checkpoint检查点",
-        "category": "Checkpoint"
+        "title": "添加检查点",
+        "category": "Checkpoint",
+        "icon": "$(add)"
       },
       {
         "command": "checkpoint.removeCheckpoint",
-        "title": "移除Checkpoint检查点",
-        "category": "Checkpoint"
+        "title": "移除检查点",
+        "category": "Checkpoint",
+        "icon": "$(trash)"
       },
       {
         "command": "checkpoint.viewCheckpoints",
-        "title": "查看所有Checkpoint检查点",
+        "title": "查看所有检查点",
         "category": "Checkpoint"
+      },
+      {
+        "command": "checkpoint.refreshTree",
+        "title": "刷新",
+        "category": "Checkpoint",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "checkpoint.jumpToCheckpoint",
+        "title": "跳转到检查点",
+        "category": "Checkpoint"
+      },
+      {
+        "command": "checkpoint.clearAll",
+        "title": "清空所有检查点",
+        "category": "Checkpoint",
+        "icon": "$(clear-all)"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "checkpointTree",
+          "name": "Checkpoint 检查点",
+          "when": "workspaceHasCheckpoint",
+          "icon": "images/checkpoint-icon.png",
+          "contextualTitle": "Checkpoint"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "checkpointTree",
+        "contents": "当前没有检查点\n\n[添加检查点](command:checkpoint.addCheckpoint)\n\n使用快捷键 `Ctrl+Alt+P` (Mac: `Cmd+Ctrl+P`) 或右键菜单添加检查点"
       }
     ],
     "menus": {
@@ -61,6 +98,30 @@
         {
           "command": "checkpoint.addCheckpoint",
           "group": "9_cutcopypaste@5"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "checkpoint.refreshTree",
+          "when": "view == checkpointTree",
+          "group": "navigation"
+        },
+        {
+          "command": "checkpoint.addCheckpoint",
+          "when": "view == checkpointTree",
+          "group": "navigation"
+        },
+        {
+          "command": "checkpoint.clearAll",
+          "when": "view == checkpointTree",
+          "group": "secondary"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "checkpoint.removeCheckpoint",
+          "when": "view == checkpointTree && viewItem == checkpoint",
+          "group": "inline"
         }
       ]
     },
@@ -79,6 +140,11 @@
           "type": "string",
           "default": "checkpoint.json",
           "description": "检查点数据存储文件名"
+        },
+        "checkpoint.showInExplorer": {
+          "type": "boolean",
+          "default": true,
+          "description": "在资源管理器中显示 Checkpoint 侧边栏"
         }
       }
     }

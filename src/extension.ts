@@ -1,16 +1,32 @@
 import * as vscode from 'vscode';
 import { CheckpointManager } from './checkpointManager';
 import { CheckpointCodeLensProvider } from './codeLensProvider';
+import { CheckpointTreeProvider } from './checkpointTreeProvider';
+import { Checkpoint } from './types';
 
 export function activate(context: vscode.ExtensionContext) {
   const manager = CheckpointManager.getInstance();
   const codeLensProvider = new CheckpointCodeLensProvider();
+  const treeProvider = new CheckpointTreeProvider();
 
   // 注册 CodeLens 提供器
   const codeLensDisposable = vscode.languages.registerCodeLensProvider(
     { pattern: '**/*' },
     codeLensProvider
   );
+
+  // 注册 TreeView
+  const treeView = vscode.window.createTreeView('checkpointTree', {
+    treeDataProvider: treeProvider,
+    showCollapseAll: true
+  });
+
+  // 设置上下文变量 - 控制侧边栏显示
+  const updateContext = () => {
+    const hasCheckpoints = manager.getAllCheckpoints().length > 0;
+    vscode.commands.executeCommand('setContext', 'workspaceHasCheckpoint', hasCheckpoints);
+  };
+  updateContext();
 
   // 注册添加检查点命令
   const addCheckpointCommand = vscode.commands.registerCommand(
@@ -39,7 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
       }
 
-      // 输入检查点信息 - 使用 createInputBox 获得更多控制
+      // 输入检查点信息
       const inputBox = vscode.window.createInputBox();
       inputBox.prompt = '请输入检查点提示信息（例如：上线前检查字段是否已添加）';
       inputBox.placeholder = '检查点提示信息';
@@ -74,8 +90,10 @@ export function activate(context: vscode.ExtensionContext) {
       // 添加检查点
       const checkpoint = manager.addCheckpoint(filePath, line, message.trim());
       
-      // 刷新 CodeLens
+      // 刷新 CodeLens 和 TreeView
       codeLensProvider.refresh();
+      treeProvider.refresh();
+      updateContext();
 
       vscode.window.showInformationMessage(
         `检查点已添加 [${checkpoint.branch}]: ${checkpoint.message}`
@@ -86,14 +104,20 @@ export function activate(context: vscode.ExtensionContext) {
   // 注册移除检查点命令
   const removeCheckpointCommand = vscode.commands.registerCommand(
     'checkpoint.removeCheckpoint',
-    async (args?: { filePath: string; line: number }) => {
+    async (args?: { filePath: string; line: number } | Checkpoint) => {
       let filePath: string;
       let line: number;
 
-      if (args) {
+      if (args && 'id' in args) {
+        // 从 Checkpoint 对象获取
+        const cp = args as Checkpoint;
+        filePath = cp.filePath;
+        line = cp.line;
+      } else if (args && 'filePath' in args && 'line' in args) {
         // 从命令参数中获取
-        filePath = args.filePath;
-        line = args.line;
+        const params = args as { filePath: string; line: number };
+        filePath = params.filePath;
+        line = params.line;
       } else {
         // 从当前编辑器获取
         const editor = vscode.window.activeTextEditor;
@@ -120,8 +144,10 @@ export function activate(context: vscode.ExtensionContext) {
       if (confirm === '确定') {
         manager.removeCheckpoint(filePath, line);
         
-        // 刷新 CodeLens
+        // 刷新 CodeLens 和 TreeView
         codeLensProvider.refresh();
+        treeProvider.refresh();
+        updateContext();
 
         vscode.window.showInformationMessage('检查点已移除');
       }
@@ -132,66 +158,76 @@ export function activate(context: vscode.ExtensionContext) {
   const viewCheckpointsCommand = vscode.commands.registerCommand(
     'checkpoint.viewCheckpoints',
     async () => {
+      // 聚焦到 TreeView
+      vscode.commands.executeCommand('checkpointTree.focus');
+    }
+  );
+
+  // 注册刷新树命令
+  const refreshTreeCommand = vscode.commands.registerCommand(
+    'checkpoint.refreshTree',
+    () => {
+      manager.refresh();
+      codeLensProvider.refresh();
+      treeProvider.refresh();
+      updateContext();
+      vscode.window.showInformationMessage('检查点列表已刷新');
+    }
+  );
+
+  // 注册跳转到检查点命令
+  const jumpToCheckpointCommand = vscode.commands.registerCommand(
+    'checkpoint.jumpToCheckpoint',
+    async (checkpoint: Checkpoint) => {
+      try {
+        const document = await vscode.workspace.openTextDocument(checkpoint.filePath);
+        const editor = await vscode.window.showTextDocument(document);
+        
+        const position = new vscode.Position(checkpoint.line, 0);
+        editor.selection = new vscode.Selection(position, position);
+        editor.revealRange(
+          new vscode.Range(position, position),
+          vscode.TextEditorRevealType.InCenter
+        );
+      } catch (error) {
+        vscode.window.showErrorMessage(`无法打开文件: ${checkpoint.filePath}`);
+      }
+    }
+  );
+
+  // 注册清空所有检查点命令
+  const clearAllCommand = vscode.commands.registerCommand(
+    'checkpoint.clearAll',
+    async () => {
       const checkpoints = manager.getAllCheckpoints();
-      
       if (checkpoints.length === 0) {
         vscode.window.showInformationMessage('当前没有检查点');
         return;
       }
 
-      // 按分支分组
-      const branchGroups = new Map<string, typeof checkpoints>();
-      checkpoints.forEach(cp => {
-        const group = branchGroups.get(cp.branch) || [];
-        group.push(cp);
-        branchGroups.set(cp.branch, group);
-      });
+      const confirm = await vscode.window.showWarningMessage(
+        `确定要清空所有 ${checkpoints.length} 个检查点吗？此操作不可恢复！`,
+        '确定',
+        '取消'
+      );
 
-      // 创建快速选择项
-      const items: vscode.QuickPickItem[] = [];
-      branchGroups.forEach((group, branch) => {
-        items.push({
-          label: `$(git-branch) ${branch}`,
-          kind: vscode.QuickPickItemKind.Separator
+      if (confirm === '确定') {
+        // 逐个删除
+        checkpoints.forEach(cp => {
+          manager.removeCheckpoint(cp.filePath, cp.line);
         });
         
-        group.forEach(cp => {
-          const fileName = cp.filePath.split(/[\\/]/).pop() || cp.filePath;
-          items.push({
-            label: `$(debug-breakpoint) ${cp.message}`,
-            description: `${fileName}:${cp.line + 1}`,
-            detail: cp.filePath
-          });
-        });
-      });
+        // 刷新
+        codeLensProvider.refresh();
+        treeProvider.refresh();
+        updateContext();
 
-      const selected = await vscode.window.showQuickPick(items, {
-        placeHolder: '选择检查点进行跳转（按分支分组）',
-        matchOnDescription: true,
-        matchOnDetail: true
-      });
-
-      if (selected && selected.detail) {
-        const checkpoint = checkpoints.find(
-          cp => cp.filePath === selected.detail && cp.message === selected.label.replace('$(debug-breakpoint) ', '')
-        );
-        
-        if (checkpoint) {
-          const document = await vscode.workspace.openTextDocument(checkpoint.filePath);
-          const editor = await vscode.window.showTextDocument(document);
-          
-          const position = new vscode.Position(checkpoint.line, 0);
-          editor.selection = new vscode.Selection(position, position);
-          editor.revealRange(
-            new vscode.Range(position, position),
-            vscode.TextEditorRevealType.InCenter
-          );
-        }
+        vscode.window.showInformationMessage('所有检查点已清空');
       }
     }
   );
 
-  // 注册文件保存监听器 - 刷新 CodeLens
+  // 注册文件保存监听器
   const onSaveDisposable = vscode.workspace.onDidSaveTextDocument(() => {
     codeLensProvider.refresh();
   });
@@ -207,38 +243,46 @@ export function activate(context: vscode.ExtensionContext) {
   const checkpointFileWatcher = vscode.workspace.createFileSystemWatcher(`**/${checkpointFilename}`);
   
   checkpointFileWatcher.onDidChange(() => {
-    // checkpoint.json 文件发生变化，重新加载并刷新 CodeLens
     manager.refresh();
     codeLensProvider.refresh();
+    treeProvider.refresh();
+    updateContext();
   });
   
   checkpointFileWatcher.onDidCreate(() => {
-    // checkpoint.json 文件被创建，重新加载
     manager.refresh();
     codeLensProvider.refresh();
+    treeProvider.refresh();
+    updateContext();
   });
   
   checkpointFileWatcher.onDidDelete(() => {
-    // checkpoint.json 文件被删除，清空检查点
     manager.refresh();
     codeLensProvider.refresh();
+    treeProvider.refresh();
+    updateContext();
   });
 
   // 将所有命令和监听器添加到订阅
   context.subscriptions.push(
     codeLensDisposable,
+    treeView,
     addCheckpointCommand,
     removeCheckpointCommand,
     viewCheckpointsCommand,
+    refreshTreeCommand,
+    jumpToCheckpointCommand,
+    clearAllCommand,
     onSaveDisposable,
     onChangeEditorDisposable,
     checkpointFileWatcher
   );
 
-  // 初始化时刷新 CodeLens
+  // 初始化
   codeLensProvider.refresh();
+  treeProvider.refresh();
 
-  console.log('Checkpoint 插件已激活');
+  console.log('Checkpoint 插件 2.0 已激活');
 }
 
 export function deactivate() {
