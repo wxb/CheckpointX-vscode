@@ -29,18 +29,11 @@ export class CheckpointTreeItem extends vscode.TreeItem {
       this.iconPath = new vscode.ThemeIcon('git-branch');
       this.contextValue = 'branch';
     } else if (checkpoint) {
-      // 检查点节点 - 使用序号作为图标
+      // 检查点节点 - 使用旗帜图标
       this.contextValue = 'checkpoint';
-      
-      // 如果有索引，创建一个显示数字的图标
-      if (index !== undefined) {
-        // 使用圆点图标配合 label 显示序号
-        this.iconPath = new vscode.ThemeIcon('circle-filled');
-        // 在 label 前添加序号
-        this.label = `${index + 1}. ${label}`;
-      } else {
-        this.iconPath = new vscode.ThemeIcon('debug-breakpoint');
-      }
+
+      // 使用旗帜图标
+      this.iconPath = new vscode.ThemeIcon('target');
       
       // 显示文件路径和行号
       const fileName = checkpoint.filePath.split(/[\\/]/).pop() || checkpoint.filePath;
